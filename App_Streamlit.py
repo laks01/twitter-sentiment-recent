@@ -29,6 +29,8 @@ import seaborn as sns
 import dotenv
 
 from dotenv import load_dotenv
+from utils import process_tweet
+from logistics_prediction import analyze_tweet_sentiment
 
 matplotlib.use('Agg')
 
@@ -65,11 +67,13 @@ def main():
     config = dotenv.dotenv_values(".env")
     print(config)
 
-    # keys and tokens from the Twitter Dev Console
+    #keys and tokens from the Twitter Dev Console
     consumer_key = config.get('consumer_key')
     consumer_secret = config.get('consumer_secret')
     access_token = config.get('access_token')
     access_token_secret = config.get('access_token_secret')
+
+
 
     # Use the above credentials to authenticate the API.
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -100,7 +104,7 @@ def main():
             else:
                 pass
 
-    # Function to Clean the Tweet.
+    # # Function to Clean the Tweet.
     def clean_tweet(tweet):
         return ' '.join(re.sub('(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|([RT])', ' ', tweet.lower()).split())
 
@@ -114,7 +118,7 @@ def main():
         else:
             return 'Negative'
     
-    # Function to Pre-process data for Worlcloud
+    # Function to Pre-process data for Wordcloud
     def prep_cloud(topic_text, topic):
         topic = str(topic).lower()
         topic= ' '.join(re.sub('([^0-9A-Za-z \t])', ' ', topic).split())
@@ -142,10 +146,12 @@ def main():
         st.success('Tweets have been Extracted !!!!')    
 
         # Call a function to get Clean tweets
-        df['clean_tweet'] = df['Tweet'].apply(lambda x : clean_tweet(x))
+        df['clean_tweet'] = df['Tweet'].apply(lambda x : process_tweet(x))
     
         # Call function to get the Sentiments
-        df["Sentiment"] = df["Tweet"].apply(lambda x : analyze_sentiment(x))
+        raw_tweets = df['clean_tweet']
+        df["Sentiment"] = analyze_tweet_sentiment(raw_tweets)
+
 
         # Write Summary of the Tweets
         st.write("Total Tweets Extracted for Topic '{}' are : {}".format(Topic,len(df.Tweet)))
