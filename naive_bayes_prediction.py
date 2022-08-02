@@ -27,3 +27,6 @@ def analyze_tweet_sentiment_with_naive_bayes(tweets):
     return df["predictions"]
 
 
+if __name__ =='__main__':
+    load_naive_bayes_vectorizer()
+    load_naive_bayes_model()
